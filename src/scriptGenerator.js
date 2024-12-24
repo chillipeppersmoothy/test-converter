@@ -1,10 +1,12 @@
 import { promises as fs } from "fs";
 import { join, relative } from "path";
 import { createHash } from "crypto";
+import { sanitizeFileName, replaceVariables } from "./utils.js";
 
 let variables = {};
 let itemCounter = 0;
 let convertedScripts = new Map();
+let prerequest_variables = {};
 
 async function loadVariables(outputDir) {
   if (!outputDir) {
@@ -35,8 +37,46 @@ async function saveVariables(outputDir) {
   );
 }
 
-function replaceVariables(text) {
-  return text.replace(/{{(.+?)}}/g, (_, key) => variables[key] || _);
+function replacePathParams(url, params) {
+  const paramsMap = params.reduce((acc, param) => {
+    acc[param.key] = param.value;
+    return acc;
+  }, {});
+
+  return url.replace(/:(\w+)/g, (_, key) => {
+    if (key in paramsMap) {
+      return paramsMap[key];
+    }
+    throw new Error(`Missing value for path parameter: ${key}`);
+  });
+}
+
+function replaceQueryParams(url, query) {
+  const QueryMap = query.reduce((acc, param) => {
+    acc[param.key] = param.value;
+    return acc;
+  }, {});
+
+  if (prerequest_variables && Object.keys(prerequest_variables).length === 0)
+    return url;
+
+  const queryParamsRegex = /([?&])([^&=]+)=({{(.*?)}})/g;
+  let replaceUrl = url;
+
+  for (const key in QueryMap) {
+    if (prerequest_variables[key]) {
+      replaceUrl = url.replace(
+        queryParamsRegex,
+        (match, delimiter, key, placeholder, paramName) => {
+          return `${delimiter}${key}=${
+            prerequest_variables[paramName] || placeholder
+          }`;
+        }
+      );
+    }
+  }
+
+  return replaceUrl;
 }
 
 function convertPreRequestScript(script) {
@@ -44,23 +84,31 @@ function convertPreRequestScript(script) {
 
   let convertedScript = "  // Pre-request Script\n";
   const lines = script.split("\n");
-
+  const regex = /(?<=\.set\(")([^"]+)",\s*([^)]*)\)/g;
   lines.forEach((line) => {
     if (
       line.includes("pm.variables.set") ||
+      line.includes("pm.collectionVariables.set") ||
       line.includes("pm.environment.set") ||
       line.includes("pm.globals.set")
     ) {
-      const match = line.match(/set$$"(.+?)",\s*(.+?)$$/);
-      if (match) {
-        const [, key, value] = match;
-        convertedScript += `  variables['${key}'] = ${value};\n`;
+      let match;
+      if ((match = regex.exec(line)) !== null) {
+        const key = match[1];
+        const value = match[2]?.trim()?.replace(/"/g, "");
+
+        const formattedValue = isNaN(value) ? value : Number(value);
+        prerequest_variables[key] = formattedValue;
       }
     } else {
       convertedScript += `  ${line}\n`;
     }
   });
-
+  convertedScript += `  const prerequest_variables = ${JSON.stringify(
+    prerequest_variables,
+    null,
+    2
+  )}\n`;
   return convertedScript;
 }
 
@@ -76,7 +124,6 @@ function convertPostResponseScript(script) {
   const lines = script.split("\n");
   let insideTest = false;
   let currentTestName = "";
-  let jsonAssignmentFound = false;
 
   const assertionRegex =
     /pm\.expect\((.*?)\)\.to\.(be\.an?|have)(\.property)?\(['"](\w+)['"]\)/;
@@ -114,8 +161,6 @@ function convertPostResponseScript(script) {
           .replace(".to.have.property(", "data.")
           .replace(".to.include(", ".toContain(");
         convertedScript += `${playwrightAssert}\n`;
-      } else if (line.includes("pm.response.json")) {
-        convertedScript += `const pwResponse = await response.json();\n`;
       }
     }
   });
@@ -164,8 +209,16 @@ export function generatePlaywrightTest(item, folderPath, outputDir) {
   }
 
   // Check if url and url.raw exist before using it
-  const requestUrl =
-    url && url.raw ? replaceVariables(url.raw) : "undefined_url";
+  let requestUrl = "";
+  requestUrl = url && url.raw ? replaceVariables(url.raw) : "undefined_url";
+  requestUrl =
+    url?.variable?.length > 0
+      ? replacePathParams(requestUrl, url.variable)
+      : requestUrl;
+  requestUrl =
+    url?.query?.length > 0
+      ? replaceQueryParams(requestUrl, url.variable)
+      : requestUrl;
 
   const relativePath = relative(folderPath, outputDir).replace(/\\/g, "/");
   const variablesImport = relativePath
@@ -203,7 +256,7 @@ async function processItem(item, parentPath = "", outputDir) {
     // This is a folder
     const folderPath = join(
       parentPath,
-      `${itemNumber}_${item.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}`
+      `${itemNumber}_${sanitizeFileName(item.name)}`
     );
     await fs.mkdir(folderPath, { recursive: true });
 
@@ -213,9 +266,7 @@ async function processItem(item, parentPath = "", outputDir) {
   } else if (item.request) {
     // This is a request
     const testScript = generatePlaywrightTest(item, parentPath, outputDir);
-    const fileName = `${itemNumber}_${item.name
-      .replace(/[^a-z0-9]/gi, "_")
-      .toLowerCase()}.spec.js`;
+    const fileName = `${itemNumber}_${sanitizeFileName(item.name)}.spec.js`;
     const filePath = join(parentPath, fileName);
     await fs.writeFile(filePath, testScript);
   }
