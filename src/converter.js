@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import { processCollection } from "./scriptGenerator.js";
+const { readFile, mkdir } = fs;
 
 async function convertPostmanToPlaywright(
   postmanCollectionPath,
@@ -7,10 +8,10 @@ async function convertPostmanToPlaywright(
 ) {
   try {
     const postmanCollection = JSON.parse(
-      await fs.readFile(postmanCollectionPath, "utf-8")
+      await readFile(postmanCollectionPath, "utf-8")
     );
 
-    await fs.mkdir(outputDir, { recursive: true });
+    await mkdir(outputDir, { recursive: true });
 
     await processCollection(postmanCollection, outputDir);
 

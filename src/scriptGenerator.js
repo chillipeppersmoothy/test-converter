@@ -52,31 +52,22 @@ function replacePathParams(url, params) {
 }
 
 function replaceQueryParams(url, query) {
-  const QueryMap = query.reduce((acc, param) => {
+  const queryMap = query.reduce((acc, param) => {
     acc[param.key] = param.value;
     return acc;
   }, {});
 
-  if (prerequest_variables && Object.keys(prerequest_variables).length === 0)
+  if (!prerequest_variables || Object.keys(prerequest_variables).length === 0)
     return url;
 
-  const queryParamsRegex = /([?&])([^&=]+)=({{(.*?)}})/g;
-  let replaceUrl = url;
-
-  for (const key in QueryMap) {
-    if (prerequest_variables[key]) {
-      replaceUrl = url.replace(
-        queryParamsRegex,
-        (match, delimiter, key, placeholder, paramName) => {
-          return `${delimiter}${key}=${
-            prerequest_variables[paramName] || placeholder
-          }`;
-        }
-      );
+  return url.replace(
+    /([?&])([^&=]+)=({{(.*?)}})/g,
+    (match, delimiter, key, placeholder, paramName) => {
+      return `${delimiter}${key}=${
+        prerequest_variables[paramName] || placeholder
+      }`;
     }
-  }
-
-  return replaceUrl;
+  );
 }
 
 function convertPreRequestScript(script) {
@@ -196,28 +187,28 @@ export function generatePlaywrightTest(item, folderPath, outputDir) {
   let requestOptions = {};
   if (header && header.length > 0) {
     requestOptions.headers = header.reduce(
-      (acc, h) => ({ ...acc, [h.key]: replaceVariables(h.value) }),
+      (acc, h) => ({ ...acc, [h.key]: replaceVariables(h.value, variables) }),
       {}
     );
   }
   if (body && body.mode === "raw") {
     try {
-      requestOptions.data = JSON.parse(replaceVariables(body.raw));
+      requestOptions.data = JSON.parse(replaceVariables(body.raw, variables));
     } catch {
-      requestOptions.data = replaceVariables(body.raw);
+      requestOptions.data = replaceVariables(body.raw, variables);
     }
   }
 
-  // Check if url and url.raw exist before using it
-  let requestUrl = "";
-  requestUrl = url && url.raw ? replaceVariables(url.raw) : "undefined_url";
+  let requestUrl = url?.raw
+    ? replaceVariables(url.raw, variables)
+    : "undefined_url";
   requestUrl =
     url?.variable?.length > 0
       ? replacePathParams(requestUrl, url.variable)
       : requestUrl;
   requestUrl =
     url?.query?.length > 0
-      ? replaceQueryParams(requestUrl, url.variable)
+      ? replaceQueryParams(requestUrl, url.query)
       : requestUrl;
 
   const relativePath = relative(folderPath, outputDir).replace(/\\/g, "/");
