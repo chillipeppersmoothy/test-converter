@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Converter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header>
+    <h1>Converter</h1>
+  </header>
+  <main>
+    <form id="converter-form">
+      <label for="source-file">Source File Path:</label>
+      <input type="text" id="source-file" name="source-file" required>
+
+      <div>
+        <input type="radio" id="playwright" name="tool" value="playwright" required>
+        <label for="playwright">Playwright</label>
+
+        <input type="radio" id="jmeter" name="tool" value="jmeter" required>
+        <label for="jmeter">JMeter</label>
+      </div>
+
+      <button type="submit">Convert</button>
+    </form>
+  </main>
+  <footer>
+    <p>&copy; 2024 Converter</p>
+  </footer>
+  <script type="module" src="main.js"></script>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 import { program } from "commander";
-import convertPostmanToPlaywright from "./src/converter.js";
+import convertPostmanToPlaywright from "./playwright/converter.js";
 
 program
   .command("convert <postmanCollectionPath> <output>")
