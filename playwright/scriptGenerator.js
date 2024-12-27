@@ -8,6 +8,27 @@ let itemCounter = 0;
 let convertedScripts = new Map();
 let prerequest_variables = {};
 
+async function createPackageJson(outputDir) {
+  if (!outputDir) {
+    console.error("Output directory is undefined");
+    return;
+  }
+
+  const packageJsonContent = {
+    name: "playwright-tests",
+    version: "1.0.0",
+    scripts: {
+      test: "playwright test"
+    },
+    dependencies: {
+      "@playwright/test": "^1.0.0"
+    }
+  };
+
+  const packageJsonPath = join(outputDir, "package.json");
+  await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonContent, null, 2), "utf8");
+}
+
 async function loadVariables(outputDir) {
   if (!outputDir) {
     console.error("Output directory is undefined");
@@ -293,4 +314,6 @@ export async function processCollection(collection, outputDir) {
   )};`;
   const variablesJsPath = join(outputDir, "variables.js");
   await fs.writeFile(variablesJsPath, variablesJsContent);
+
+  await createPackageJson(outputDir);
 }

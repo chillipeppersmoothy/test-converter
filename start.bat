@@ -1,4 +1,3 @@
-:: filepath: /c:/Users/ASUS/Downloads/convert-to-playwright/start.bat
 @echo off
 :: Start the server
 start cmd.exe /K "node server.js"

@@ -4,34 +4,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Converter</title>
+  <title>Convert Postman Collection</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <header>
-    <h1>Converter</h1>
-  </header>
-  <main>
-    <form id="converter-form">
-      <label for="source-file">Source File Path:</label>
-      <input type="text" id="source-file" name="source-file" required>
-
-      <div>
-        <input type="radio" id="playwright" name="tool" value="playwright" required>
-        <label for="playwright">Playwright</label>
-
-        <input type="radio" id="jmeter" name="tool" value="jmeter" required>
-        <label for="jmeter">JMeter</label>
-      </div>
-
-      <button type="submit">Convert</button>
-    </form>
-  </main>
-  <footer>
-    <p>&copy; 2024 Converter</p>
-  </footer>
-  <script type="module" src="main.js"></script>
+  <h1>Convert Postman Collection</h1>
+  <form id="converter-form">
+    <label for="source-file">Source Folder Path:</label> <input type="text" id="source-file" name="source-file" required>
+    <br><br>
+    <label>
+      <input type="radio" name="tool" value="playwright">Playwright
+    </label>
+    <label>
+      <input type="radio" name="tool" value="jmeter"> JMeter
+    </label>
+    <br><br>
+    <button type="submit">Convert</button>
+  </form>
+  <script src="main.js"></script>
 </body>
 
 </html>
