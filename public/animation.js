@@ -10,7 +10,9 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 const particles = [];
-const particleCount = 200;
+
+// Adjust particle count based on screen size
+const particleCount = window.innerWidth < 768 ? 100 : 200;
 
 // Particle object
 class Particle {
@@ -35,6 +37,10 @@ class Particle {
     // Bounce off edges
     if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
     if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+    // Limit particle speed
+    this.vx = Math.max(Math.min(this.vx, 1.5), -1.5);
+    this.vy = Math.max(Math.min(this.vy, 1.5), -1.5);
   }
 }
 
@@ -63,15 +69,22 @@ function connectParticles() {
   }
 }
 
-// Animation loop
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach((particle) => {
-    particle.update();
-    particle.draw();
-  });
-  connectParticles();
+// Animation loop with frame rate control
+let lastTime = 0;
+const fps = 60;
+const interval = 1000 / fps;
+
+function animate(time) {
+  if (time - lastTime >= interval) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((particle) => {
+      particle.update();
+      particle.draw();
+    });
+    connectParticles();
+    lastTime = time;
+  }
   requestAnimationFrame(animate);
 }
 
-animate();
+animate(0);
