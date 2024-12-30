@@ -6,22 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Convert Postman Collection</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="animation.js" defer></script>
 </head>
 
 <body>
-  <h1>Convert Postman Collection</h1>
-  <form id="converter-form">
-    <label for="source-file">Source Folder Path:</label> <input type="text" id="source-file" name="source-file" required>
-    <br><br>
-    <label>
-      <input type="radio" name="tool" value="playwright">Playwright
-    </label>
-    <label>
-      <input type="radio" name="tool" value="jmeter"> JMeter
-    </label>
-    <br><br>
-    <button type="submit">Convert</button>
-  </form>
+  <canvas id="background"></canvas>
+  <div class="center">
+    <h1>Convert Postman Collection</h1>
+    <form id="converter-form">
+      <label for="source-file">Source Folder Path:</label> <input type="text" id="source-file" name="source-file"
+        required>
+      <br><br>
+      <label>
+        <input type="radio" name="tool" value="playwright">Playwright
+      </label>
+      <label>
+        <input type="radio" name="tool" value="jmeter"> JMeter
+      </label>
+      <br><br>
+      <button type="submit">Convert</button>
+    </form>
+  </div>
   <script src="main.js"></script>
 </body>
 
