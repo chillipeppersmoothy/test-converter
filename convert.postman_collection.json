@@ -17,10 +17,6 @@
 							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Response time less than 2000ms\", function () {\r",
-							"    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-							"});\r",
-							"\r",
 							"const response = pm.response.json();\r",
 							"\r",
 							"pm.test(\"UserId is equal to 1\", function () {\r",
@@ -33,6 +29,10 @@
 							"\r",
 							"pm.test(\"Title is equal to false\", function () {\r",
 							"    pm.expect(response.title).to.equal(\"delectus aut autem\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response time is less than 2000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
 							"});"
 						],
 						"type": "text/javascript",
@@ -44,7 +44,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://jsonplaceholder.typicode.com/todos/1",
+					"raw": "https://jsonplaceholder.typicode.com/todos/:id",
 					"protocol": "https",
 					"host": [
 						"jsonplaceholder",
@@ -53,11 +53,94 @@
 					],
 					"path": [
 						"todos",
-						"1"
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
 					]
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Page",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.set('PageNo','2');\r",
+							"console.log('---In Pre-request of Request1---');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status Code', () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"console.log('---In test of Request 1---');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/users?page={{PageNo}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"users"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "{{PageNo}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "https://reqres.in",
+			"type": "string"
 		}
 	]
 }

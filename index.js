@@ -2,8 +2,10 @@ import { program } from "commander";
 import convertPostmanToPlaywright from "./playwright/converter.js";
 
 program
-  .command("convert <postmanCollectionPath> <output>")
-  .action(convertPostmanToPlaywright);
+  .command("convert <postmanCollectionPath> <output> [postmanEnvironmentFile]")
+  .action((postmanCollectionPath, output, postmanEnvironmentFile) => {
+    convertPostmanToPlaywright(postmanCollectionPath, output, postmanEnvironmentFile);
+  });
 
 program.parse(process.argv);
 

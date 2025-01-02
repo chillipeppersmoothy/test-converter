@@ -4,16 +4,24 @@ const { readFile, mkdir } = fs;
 
 async function convertPostmanToPlaywright(
   postmanCollectionPath,
-  outputDir = process.cwd()
+  outputDir = process.cwd(),
+  postmanEnvironmentFile
 ) {
   try {
     const postmanCollection = JSON.parse(
       await readFile(postmanCollectionPath, "utf-8")
     );
 
+    let postmanEnvironment = null;
+    if (postmanEnvironmentFile) {
+      postmanEnvironment = JSON.parse(
+        await readFile(postmanEnvironmentFile, "utf-8")
+      );
+    }
+
     await mkdir(outputDir, { recursive: true });
 
-    await processCollection(postmanCollection, outputDir);
+    await processCollection(postmanCollection, outputDir, postmanEnvironment);
 
     console.log("Conversion complete. Playwright scripts have been generated.");
   } catch (error) {
