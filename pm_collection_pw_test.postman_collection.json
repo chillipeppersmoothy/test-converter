@@ -1,0 +1,707 @@
+{
+	"info": {
+		"_postman_id": "4abca536-c3e4-43ce-a73d-cabf88833194",
+		"name": "pm_collection_pw_test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16227959"
+	},
+	"item": [
+		{
+			"name": "Demo_user",
+			"item": [
+				{
+					"name": "Get Single user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"User email is present in the response\", function () {\r",
+									"    pm.expect(response.data.email).to.equal(\"janet.weaver@reqres.in\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is present and has the value 'application/json; charset=utf-8'\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"application/json; charset=utf-8\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Support URL is 'https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral'\", function () {\r",
+									"    pm.expect(response.support.url).to.equal(\"https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User ID is 2\", function () {\r",
+									"    pm.expect(response.data.id).to.equal(2);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User first name is Janet\", function () {\r",
+									"    pm.expect(response.data.first_name).to.equal(\"Janet\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User last name is Weaver\", function () {\r",
+									"    pm.expect(response.data.last_name).to.equal(\"Weaver\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User avatar URL is valid\", function () {\r",
+									"    pm.expect(response.data.avatar).to.include(\"https://reqres.in/img/faces/\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/users/:user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":user"
+							],
+							"variable": [
+								{
+									"key": "user",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body contains the correct name and job\", function () {\r",
+									"    pm.response.to.have.jsonBody('name', 'morpheus');\r",
+									"    pm.response.to.have.jsonBody('job', 'leader');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body contains the id and createdAt fields\", function () {\r",
+									"    pm.response.to.have.jsonBody('id');\r",
+									"    pm.response.to.have.jsonBody('createdAt');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is present\", function () {\r",
+									"    pm.response.to.have.header(\"content-type\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 1000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"morpheus\",\r\n    \"job\": \"leader\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 1000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify response body properties\", function () {\r",
+									"    pm.response.to.have.jsonBody(\"name\", \"morpheus\");\r",
+									"    pm.response.to.have.jsonBody(\"job\", \"zion resident\");\r",
+									"    pm.response.to.have.jsonBody(\"updatedAt\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Content-Type header is present\", function () {\r",
+									"    pm.response.to.have.header(\"content-type\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"morpheus\",\r\n    \"job\": \"zion resident\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/users/{{userId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 1000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify the presence of 'content-length' header\", function () {\r",
+									"    pm.response.to.have.header(\"content-length\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/users/2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"pm.collectionVariables.set('url', 'https://reqres.in');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Parameters",
+			"item": [
+				{
+					"name": "Page",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set('PageNo','2');"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 1000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Validate response body structure\", function () {\r",
+									"    pm.expect(response).to.have.keys(['page', 'per_page', 'total', 'total_pages', 'data', 'support']);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Number of elements in the 'data' array\", function () {\r",
+									"    pm.expect(response.data).to.have.lengthOf(6);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify the presence of user with id 7\", function () {\r",
+									"    pm.expect(response.data.some(user => user.id === 7)).to.be.true;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify the email of the user with id 7\", function () {\r",
+									"    pm.expect(response.data.find(user => user.id === 7).email).to.eql(\"michael.lawson@reqres.in\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify the first name of the user with id 7\", function () {\r",
+									"    pm.expect(response.data.find(user => user.id === 7).first_name).to.eql(\"Michael\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify the last name of the user with id 7\", function () {\r",
+									"    pm.expect(response.data.find(user => user.id === 7).last_name).to.eql(\"Lawson\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify the avatar of the user with id 7\", function () {\r",
+									"    pm.expect(response.data.find(user => user.id === 7).avatar).to.eql(\"https://reqres.in/img/faces/7-image.jpg\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/users?page={{PageNo}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{PageNo}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "different levels",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.globals.set('page','4');\r",
+									"pm.collectionVariables.set('page','3');\r",
+									"pm.environment.set('page','2');\r",
+									"pm.variables.set('page','1');"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body has the correct structure\", function () {\r",
+									"    pm.response.to.have.jsonBody(\"page\");\r",
+									"    pm.response.to.have.jsonBody(\"per_page\");\r",
+									"    pm.response.to.have.jsonBody(\"total\");\r",
+									"    pm.response.to.have.jsonBody(\"total_pages\");\r",
+									"    pm.response.to.have.jsonBody(\"data\");\r",
+									"    pm.response.to.have.jsonBody(\"support\");\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Emails of each user are valid\", function () {\r",
+									"    response.data.forEach(function (user) {\r",
+									"        pm.expect(user.email).to.be.a('string');\r",
+									"        pm.expect(user.email).to.include('@');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 1000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify email for user with id 3\", function () {\r",
+									"    pm.expect(response.data[2].email).to.equal(\"emma.wong@reqres.in\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify first name for user with id 3\", function () {\r",
+									"    pm.expect(response.data[2].first_name).to.equal(\"Emma\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify last name for user with id 3\", function () {\r",
+									"    pm.expect(response.data[2].last_name).to.equal(\"Wong\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify avatar URL for user with id 3\", function () {\r",
+									"    pm.expect(response.data[2].avatar).to.equal(\"https://reqres.in/img/faces/3-image.jpg\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/users?page={{page}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{page}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body has the correct properties\", function () {\r",
+									"    pm.response.to.have.jsonBody('id');\r",
+									"    pm.response.to.have.jsonBody('token');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 1000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/{{endpoint}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"{{endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register user XML",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<request>\r\n    <email>{{email}}</email>\r\n    <password>{{password}}</password>\r\n</request>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/{{endpoint}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"{{endpoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('email', 'eve.holt@reqres.in');",
+							"pm.collectionVariables.set('password', 'pistol');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Correlation",
+			"item": [
+				{
+					"name": "page env",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 1000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response body has correct page number\", function () {\r",
+									"    pm.expect(response.page).to.equal(1);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body has data array with 6 elements\", function () {\r",
+									"    pm.expect(response.data).to.have.lengthOf(6);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"All objects in data array have id, email, first_name, last_name, and avatar properties\", function () {\r",
+									"    const data = pm.response.json().data[0];\r",
+									"\r",
+									"    pm.expect(data).to.have.property('id');\r",
+									"    pm.expect(data).to.have.property('email');\r",
+									"    pm.expect(data).to.have.property('first_name');\r",
+									"    pm.expect(data).to.have.property('last_name');\r",
+									"    pm.expect(data).to.have.property('avatar');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/users?page={{id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.variables.set('url','https://reqres.in')"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "https://reqres.in"
+		},
+		{
+			"key": "user",
+			"value": "1"
+		},
+		{
+			"key": "endpoint",
+			"value": "api/register"
+		},
+		{
+			"key": "email",
+			"value": "eve.holt@reqres.in"
+		},
+		{
+			"key": "password",
+			"value": "pistol"
+		},
+		{
+			"key": "page",
+			"value": ""
+		}
+	]
+}

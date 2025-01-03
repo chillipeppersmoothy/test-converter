@@ -38,7 +38,9 @@ async function createPackageJson(outputDir) {
 }
 
 function replacePathParams(url, params) {
-  const paramsMap = Object.fromEntries(params.map(param => [param.key, param.value]));
+  const paramsMap = Object.fromEntries(
+    params.map((param) => [param.key, param.value])
+  );
   return url.replace(/:(\w+)/g, (_, key) => {
     if (key in paramsMap) {
       return paramsMap[key];
@@ -48,9 +50,12 @@ function replacePathParams(url, params) {
 }
 
 function replaceQueryParams(url, query) {
-  const queryMap = Object.fromEntries(query.map(param => [param.key, param.value]));
+  const queryMap = Object.fromEntries(
+    query.map((param) => [param.key, param.value])
+  );
 
-  if (!prerequest_variables || !Object.keys(prerequest_variables).length) return url;
+  if (!prerequest_variables || !Object.keys(prerequest_variables).length)
+    return url;
 
   let replacedUrl = url;
 
@@ -115,7 +120,11 @@ function convertPreRequestScript(script) {
     }
   });
 
-  convertedScript += `  const prerequest_variables = ${JSON.stringify(prerequest_variables, null, 2)}\n`;
+  convertedScript += `  const prerequest_variables = ${JSON.stringify(
+    prerequest_variables,
+    null,
+    2
+  )}\n`;
   return convertedScript;
 }
 
@@ -135,10 +144,13 @@ function convertPostResponseScript(script) {
 
   lines.forEach((line) => {
     if (line.includes("pm.response.json()")) {
-      const match = line.match(/(?:var|let|const) (\w+) = pm.result.json\(\);/);
+      const match = line.match(
+        /(?:var|let|const) (\w+) = pm.response.json\(\);/
+      );
+
       if (match) {
         const variableName = match[1];
-        convertedScript += `    const ${variableName} = await response.json();\n`;
+        convertedScript += `\n    const ${variableName} = await result.json();\n`;
       }
     } else if (line.includes("pm.test(")) {
       insideTest = true;
@@ -151,9 +163,15 @@ function convertPostResponseScript(script) {
       insideTest = false;
     } else if (insideTest) {
       if (line.includes("pm.response.to.have.status")) {
-        convertedScript += `    expect(result.status()).toBe(${line.match(/\d+/)[0]});\n`;
-      } else if (line.includes("pm.expect(pm.result.responseTime).to.be.below")) {
-        convertedScript += `    expect(responseTime).toBeLessThan(${line.match(/\d+/)[0]});\n`;
+        convertedScript += `    expect(result.status()).toBe(${
+          line.match(/\d+/)[0]
+        });\n`;
+      } else if (
+        line.includes("pm.expect(pm.response.responseTime).to.be.below")
+      ) {
+        convertedScript += `    expect(responseTime).toBeLessThan(${
+          line.match(/\d+/)[0]
+        });\n`;
       } else if (line.includes("pm.expect")) {
         const playwrightAssert = line
           .replace("pm.expect", "expect")
@@ -182,11 +200,15 @@ export function generatePlaywrightTest(item, folderPath, outputDir) {
     const testEvent = event.find((e) => e.listen === "test");
 
     if (preRequestEvent && preRequestEvent.script) {
-      preRequestScript = convertPreRequestScript(preRequestEvent.script.exec.join("\n"));
+      preRequestScript = convertPreRequestScript(
+        preRequestEvent.script.exec.join("\n")
+      );
     }
 
     if (testEvent && testEvent.script) {
-      postResponseScript = convertPostResponseScript(testEvent.script.exec.join("\n"));
+      postResponseScript = convertPostResponseScript(
+        testEvent.script.exec.join("\n")
+      );
     }
   }
 
@@ -213,9 +235,17 @@ export function generatePlaywrightTest(item, folderPath, outputDir) {
     }
   }
 
-  let requestUrl = url?.raw ? replaceVariables(url.raw, variables) : "undefined_url";
-  requestUrl = url?.variable?.length > 0 ? replacePathParams(requestUrl, url.variable) : requestUrl;
-  requestUrl = url?.query?.length > 0 ? replaceQueryParams(requestUrl, url.query) : requestUrl;
+  let requestUrl = url?.raw
+    ? replaceVariables(url.raw, variables)
+    : "undefined_url";
+  requestUrl =
+    url?.variable?.length > 0
+      ? replacePathParams(requestUrl, url.variable)
+      : requestUrl;
+  requestUrl =
+    url?.query?.length > 0
+      ? replaceQueryParams(requestUrl, url.query)
+      : requestUrl;
   requestUrl = replaceVariables(requestUrl, variables);
 
   const relativePath = relative(folderPath, outputDir).replace(/\\/g, "/");
@@ -227,15 +257,20 @@ export function generatePlaywrightTest(item, folderPath, outputDir) {
 
   return `
 import { test, expect } from '@playwright/test';
+import https from 'https';
 ${variablesImport}
+
+const agent = new https.Agent({ rejectUnauthorized: false });
+const startTime = Date.now();
 
 test('${name}', async ({ request }) => {
 ${preRequestScript}
-  const startTime = Date.now();
-
   const result = await request.${method.toLowerCase()}('${requestUrl}'${
-    Object.keys(requestOptions).length > 0 ? `, ${JSON.stringify(requestOptions, null, 2)}` : ""
+    Object.keys(requestOptions).length > 0
+      ? `, {...${JSON.stringify(requestOptions, null, 2)}, httpsAgent: agent }`
+      : `, { httpsAgent: agent } `
   });
+  
   const responseTime = Date.now() - startTime;
 
   ${postResponseScript}
@@ -252,7 +287,10 @@ async function processItem(item, parentPath = "", outputDir) {
 
   if (item.item) {
     // This is a folder
-    const folderPath = join(parentPath, `${itemNumber}_${sanitizeFileName(item.name)}`);
+    const folderPath = join(
+      parentPath,
+      `${itemNumber}_${sanitizeFileName(item.name)}`
+    );
     await fs.mkdir(folderPath, { recursive: true });
 
     // Process folder-level pre-request scripts
@@ -275,7 +313,11 @@ async function processItem(item, parentPath = "", outputDir) {
   }
 }
 
-export async function processCollection(collection, outputDir, postmanEnvironment) {
+export async function processCollection(
+  collection,
+  outputDir,
+  postmanEnvironment
+) {
   if (!outputDir) {
     throw new Error("Output directory is undefined");
   }
@@ -300,7 +342,11 @@ export async function processCollection(collection, outputDir, postmanEnvironmen
   }
 
   // Create a variables.js file to export the variables
-  const variablesJsContent = `export const variables = ${JSON.stringify(variables, null, 2)};`;
+  const variablesJsContent = `export const variables = ${JSON.stringify(
+    variables,
+    null,
+    2
+  )};`;
   const variablesJsPath = join(outputDir, "variables.js");
   await fs.writeFile(variablesJsPath, variablesJsContent);
 
