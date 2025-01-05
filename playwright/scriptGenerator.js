@@ -172,14 +172,64 @@ function convertPostResponseScript(script) {
         convertedScript += `    expect(responseTime).toBeLessThan(${
           line.match(/\d+/)[0]
         });\n`;
+      } else if (line.includes("pm.response.to.have.header")) {
+        if (line.match(/pm\.response\.to\.have\.header\("([^"]+)"\)/)) {
+          const headerName = line.match(
+            /pm\.response\.to\.have\.header\("([^"]+)"\)/
+          )[1];
+          convertedScript += `    expect(result.headers()['${headerName.toLowerCase()}']).toBeDefined();\n`;
+        } else if (
+          line.match(/pm\.response\.to\.have\.header\("([^"]+)",\s*"([^"]+)"\)/)
+        ) {
+          const headerName = line.match(
+            /pm\.response\.to\.have\.header\("([^"]+)",\s*"([^"]+)"\)/
+          )[1];
+          const headerValue = line.match(
+            /pm\.response\.to\.have\.header\("([^"]+)",\s*"([^"]+)"\)/
+          )[2];
+          convertedScript += `    expect(result.headers()['${headerName.toLowerCase()}']).toBe('${headerValue}');\n`;
+        }
+      } else if (line.includes("pm.response.to.have.jsonBody")) {
+        const match = line.match(
+          /pm\.response\.to\.have\.jsonBody\('([^']+)',?\s*'([^']*)'\)/
+        );
+        if (match) {
+          const jsonKey = match[1];
+          const jsonValue = match[2];
+          if (jsonValue) {
+            convertedScript += `    expect((await result.json()).${jsonKey}).toBe('${jsonValue}');\n`;
+          } else {
+            convertedScript += `    expect((await result.json()).${jsonKey}).toBeDefined();\n`;
+          }
+        }
       } else if (line.includes("pm.expect")) {
-        const playwrightAssert = line
-          .replace("pm.expect", "expect")
-          .replace(".to.eql(", ".toEqual(")
-          .replace(".to.equal(", ".toBe(")
-          .replace(".to.have.property(", "data.")
-          .replace(".to.include(", ".toContain(");
-        convertedScript += `${playwrightAssert}\n`;
+        if (
+          line.match(/pm\.expect\(([^)]+)\)\.to\.have\.keys\(\[([^\]]+)\]\)/)
+        ) {
+          const responseVar = line.match(/pm\.expect\(([^)]+)\)/)[1];
+          const keys = line.match(/\.to\.have\.keys\(\[([^\]]+)\]\)/)[1];
+          const keysArray = keys
+            .split(",")
+            .map((key) => key.trim().replace(/['"]/g, ""));
+          convertedScript += `    expect(Object.keys(${responseVar})).toEqual(expect.arrayContaining([${keysArray
+            .map((key) => `'${key}'`)
+            .join(", ")}]));\n`;
+        } else if (
+          line.match(/expect\(([^)]+)\.data\)\.to\.have\.lengthOf\((\d+)\)/)
+        ) {
+          const responseVar = line.match(/expect\(([^)]+)\.data\)/)[1];
+          const length = line.match(/\.to\.have\.lengthOf\((\d+)\)/)[1];
+          convertedScript += `    expect(${responseVar}.data.length).toBe(${length});\n`;
+        } else {
+          const playwrightAssert = line
+            .replace("pm.expect", "expect")
+            .replace(".to.be.true", ".toBe(true)")
+            .replace(".to.eql(", ".toEqual(")
+            .replace(".to.equal(", ".toBe(")
+            .replace(".to.have.property(", "data.")
+            .replace(".to.include(", ".toContain(");
+          convertedScript += `${playwrightAssert}\n`;
+        }
       }
     }
   });
@@ -213,6 +263,7 @@ export function generatePlaywrightTest(item, folderPath, outputDir) {
   }
 
   let requestOptions = {};
+
   if (header && header.length > 0) {
     requestOptions.headers = header.reduce(
       (acc, h) => ({ ...acc, [h.key]: replaceVariables(h.value, variables) }),
@@ -267,7 +318,7 @@ test('${name}', async ({ request }) => {
 ${preRequestScript}
   const result = await request.${method.toLowerCase()}('${requestUrl}'${
     Object.keys(requestOptions).length > 0
-      ? `, {...${JSON.stringify(requestOptions, null, 2)}, httpsAgent: agent }`
+      ? `, ${JSON.stringify(requestOptions, null, 2)}`
       : `, { httpsAgent: agent } `
   });
   

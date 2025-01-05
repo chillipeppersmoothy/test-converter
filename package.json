@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "pw": "node index.js"
+    "pw": "node index.js",
+    "test": "playwright test"
   },
   "keywords": [],
   "author": "",
